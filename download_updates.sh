@@ -3,8 +3,9 @@
 # ----------------------------------
 # Job Configuration
 # ----------------------------------
-PYTHON='/usr/bin/python'
-SCRIPT_LOCATION='/home/pi/gogrepo/gogrepo.py'
+
+DEFAULT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/gogrepo.py"
+GOGREPO=$DEFAULT_LOCATION
 
 # platforms to download updates for
 PLATFORMS='windows linux mac'
@@ -13,19 +14,22 @@ PLATFORMS='windows linux mac'
 LANGUAGES='en'
 
 # location to backup games and extras to
-BACKUP_LOCATION='/home/pi/gogrepo/backups'
+BACKUP_FOLDER="$(dirname $GOGREPO)/backups"
+
 # ----------------------------------
 
-gogrepo=''$PYTHON' '$SCRIPT_LOCATION''
+function update_and_download {
+  # script expects execution in the same current working directory where it lives
+  cd $(dirname $GOGREPO)
 
-# script expects execution in the same current working directory where it lives
-cd $(dirname $SCRIPT_LOCATION)
+  # check for new games and update manifest
+  $GOGREPO update -os $PLATFORMS -lang $LANGUAGES -skipknown
 
-# check for new games
-$gogrepo update -os $PLATFORMS -lang $LANGUAGES -skipknown
+  # check for updates to existing games and update manifest
+  $GOGREPO update -os $PLATFORMS -lang $LANGUAGES -updateonly
 
-# check for updates
-$gogrepo update -os $PLATFORMS -lang $LANGUAGES -updateonly
+  # download missing files according to the manifest 
+  $GOGREPO download $BACKUP_FOLDER
+}
 
-# download manifest updates
-$gogrepo download $BACKUP_LOCATION
+update_and_download

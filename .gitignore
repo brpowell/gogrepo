@@ -1,5 +1,8 @@
-# Authentication cookies
+# authentication cookies
 gog-cookies.dat
 
-# Library manifest
+# library manifest
 gog-manifest.dat
+
+# default backups folder
+backups/
